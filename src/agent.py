@@ -18,7 +18,7 @@ load_dotenv()
 
 # llm setup
 
-MODEL_NAME = "gemini-3-flash-preview"
+MODEL_NAME = "gemini-2.5-flash"
 
 llm = ChatGoogleGenerativeAI(
     model=MODEL_NAME,
