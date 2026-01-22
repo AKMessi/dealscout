@@ -22,190 +22,380 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for clean white background aesthetic
+# World-class CSS design system
 st.markdown("""
     <style>
-    /* Main container styling */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    /* Main container - premium spacing */
     .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
-        max-width: 1400px;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        padding-left: 3rem;
+        padding-right: 3rem;
+        max-width: 1600px;
     }
     
-    /* White theme overrides */
+    /* App background - pristine white */
     .stApp {
-        background-color: #ffffff;
-        color: #1f2937;
+        background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+        color: #0f172a;
     }
     
-    /* Ensure all text is dark and readable */
-    h1, h2, h3, h4, h5, h6, p, div, span, label {
-        color: #1f2937 !important;
+    /* Premium typography */
+    h1 {
+        font-size: 2.75rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.02em !important;
+        color: #0f172a !important;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.1 !important;
     }
     
-    /* Input styling */
+    h2 {
+        font-size: 1.875rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.01em !important;
+        color: #1e293b !important;
+        margin-top: 2.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    h3 {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        margin-top: 2rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Premium input styling */
     .stTextArea textarea, .stTextInput input {
-        background-color: #ffffff;
-        color: #1f2937;
-        border: 1px solid #d1d5db;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 14px 16px !important;
+        font-size: 15px !important;
+        font-weight: 400 !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
     
     .stTextArea textarea:focus, .stTextInput input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+        outline: none !important;
     }
     
-    /* Disabled text areas (for display) */
+    .stTextArea textarea:hover, .stTextInput input:hover {
+        border-color: #cbd5e1 !important;
+    }
+    
+    /* Disabled inputs */
     .stTextArea textarea[disabled], .stTextInput input[disabled] {
-        background-color: #f9fafb;
-        color: #1f2937;
-        border: 1px solid #e5e7eb;
-        opacity: 1;
+        background-color: #f8fafc !important;
+        color: #64748b !important;
+        border-color: #e2e8f0 !important;
+        opacity: 1 !important;
     }
     
-    /* Metric cards */
+    /* Premium metric cards */
+    [data-testid="stMetricContainer"] {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    [data-testid="stMetricContainer"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+        border-color: #cbd5e1 !important;
+    }
+    
     [data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.02em !important;
+        line-height: 1.2 !important;
     }
     
     [data-testid="stMetricLabel"] {
-        font-size: 0.9rem;
-        color: #6b7280;
-        font-weight: 500;
+        font-size: 0.875rem !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        margin-top: 8px !important;
     }
     
     [data-testid="stMetricDelta"] {
-        font-weight: 500;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
     }
     
-    /* Expander styling */
+    /* Premium expanders */
     .streamlit-expanderHeader {
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
-        color: #1f2937;
-        font-weight: 600;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        color: #1e293b !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        padding: 16px 20px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
     
     .streamlit-expanderHeader:hover {
-        background-color: #f3f4f6;
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
     }
     
     .streamlit-expanderContent {
-        background-color: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-top: none;
+        background-color: #ffffff !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-top: none !important;
+        border-radius: 0 0 12px 12px !important;
+        padding: 20px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
     
-    /* Chat message styling */
+    /* Premium chat messages */
     .stChatMessage {
-        padding: 1rem;
-        margin: 0.5rem 0;
-        border-radius: 8px;
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
+        padding: 20px 24px !important;
+        margin: 12px 0 !important;
+        border-radius: 16px !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        border: 1.5px solid #e2e8f0 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .stChatMessage:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06) !important;
+        transform: translateY(-1px) !important;
     }
     
     .stChatMessage p, .stChatMessage div, .stChatMessage span {
-        color: #1f2937 !important;
+        color: #1e293b !important;
+        line-height: 1.6 !important;
     }
     
-    /* Markdown text styling */
-    .stMarkdown {
-        color: #1f2937;
-    }
-    
-    .stMarkdown p, .stMarkdown li, .stMarkdown strong {
-        color: #1f2937;
-    }
-    
-    /* Status styling */
+    /* Premium status indicator */
     [data-testid="stStatus"] {
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 1rem;
-        color: #1f2937;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        color: #1e293b !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
     }
     
-    /* Final memo container */
+    /* Premium final memo container */
     .final-memo-container {
-        background-color: #ffffff;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 2rem;
-        margin: 1rem 0;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        color: #1f2937;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 20px !important;
+        padding: 32px 40px !important;
+        margin: 2rem 0 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+        color: #1e293b !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .final-memo-container:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.06) !important;
+        transform: translateY(-2px) !important;
     }
     
     .final-memo-container p, .final-memo-container div {
-        color: #1f2937 !important;
-        line-height: 1.6;
+        color: #1e293b !important;
+        line-height: 1.75 !important;
+        font-size: 15px !important;
     }
     
     .memo-header-invest {
-        color: #059669;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
+        color: #059669 !important;
+        font-size: 1.75rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 1.5rem !important;
+        letter-spacing: -0.01em !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
     }
     
     .memo-header-pass {
-        color: #dc2626;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
+        color: #dc2626 !important;
+        font-size: 1.75rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 1.5rem !important;
+        letter-spacing: -0.01em !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
     }
     
     .memo-header-maybe {
-        color: #d97706;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
+        color: #d97706 !important;
+        font-size: 1.75rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 1.5rem !important;
+        letter-spacing: -0.01em !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
     }
     
-    /* Button styling */
+    /* Premium button styling */
     .stButton > button {
-        background-color: #3b82f6;
-        color: #ffffff;
-        border: none;
-        font-weight: 600;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        padding: 14px 28px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        letter-spacing: 0.01em !important;
     }
     
     .stButton > button:hover {
-        background-color: #2563eb;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        transform: translateY(-1px) !important;
     }
     
-    /* Sidebar styling */
+    .stButton > button:active {
+        transform: translateY(0) !important;
+    }
+    
+    /* Premium sidebar */
     [data-testid="stSidebar"] {
-        background-color: #f9fafb;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+        border-right: 1.5px solid #e2e8f0 !important;
     }
     
     [data-testid="stSidebar"] .stTextInput input {
-        background-color: #ffffff;
-        color: #1f2937;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 10px !important;
     }
     
-    /* Info box styling */
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        color: #1e293b !important;
+    }
+    
+    /* Premium info boxes */
     .stAlert {
-        background-color: #eff6ff;
-        border: 1px solid #bfdbfe;
-        color: #1e40af;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+        border: 1.5px solid #93c5fd !important;
+        border-radius: 12px !important;
+        color: #1e40af !important;
+        padding: 16px 20px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
     
-    /* Caption styling */
+    /* Premium caption */
     .stCaption {
-        color: #6b7280;
+        color: #64748b !important;
+        font-size: 0.8125rem !important;
+        font-weight: 500 !important;
+        margin-top: 8px !important;
+    }
+    
+    /* Premium dividers */
+    hr {
+        border: none !important;
+        border-top: 1.5px solid #e2e8f0 !important;
+        margin: 2.5rem 0 !important;
+    }
+    
+    /* Premium markdown */
+    .stMarkdown {
+        color: #1e293b !important;
+        line-height: 1.7 !important;
+    }
+    
+    .stMarkdown p, .stMarkdown li, .stMarkdown strong {
+        color: #1e293b !important;
+    }
+    
+    .stMarkdown strong {
+        font-weight: 600 !important;
+        color: #0f172a !important;
+    }
+    
+    /* Premium JSON display */
+    .stJson {
+        background: #f8fafc !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+    }
+    
+    /* Premium download button */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-weight: 600 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Premium error styling */
+    .stAlert[data-baseweb="notification"] {
+        border-radius: 12px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    /* Smooth scroll */
+    html {
+        scroll-behavior: smooth;
     }
     
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+    
+    /* Premium spacing utilities */
+    .premium-spacing {
+        margin: 2rem 0;
+    }
+    
+    /* Custom metric badge */
+    .metric-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #0369a1;
+        margin-top: 8px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -285,7 +475,6 @@ def parse_debate_transcript(transcript: str) -> list:
         line = line.strip()
         if not line:
             if current_agent and current_message:
-                # Empty line might indicate message end, but we'll continue collecting
                 continue
             continue
         
@@ -299,7 +488,6 @@ def parse_debate_transcript(transcript: str) -> list:
                     "avatar": "📈" if "Market" in current_agent else "🛡️"
                 })
             current_agent = "Market Agent"
-            # Extract message after colon
             parts = line.split(":", 1)
             current_message = [parts[1].strip()] if len(parts) > 1 else []
         elif "product agent" in line_lower and ":" in line:
@@ -313,7 +501,6 @@ def parse_debate_transcript(transcript: str) -> list:
             parts = line.split(":", 1)
             current_message = [parts[1].strip()] if len(parts) > 1 else []
         elif line.startswith("TOPIC:") or line.startswith("CONSENSUS:") or line.lower().startswith("turn"):
-            # Save headers as system messages for context
             if line.startswith("TOPIC:") or line.startswith("CONSENSUS:"):
                 messages.append({
                     "agent": "System",
@@ -391,9 +578,15 @@ END OF REPORT
     return report
 
 
-# Sidebar for API key
+# Premium Sidebar
 with st.sidebar:
-    st.title("⚙️ Configuration")
+    st.markdown("""
+    <div style='margin-bottom: 2rem;'>
+        <h1 style='font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;'>⚙️ Settings</h1>
+        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Configure your API keys</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("---")
     
     serper_key = st.text_input(
@@ -407,39 +600,50 @@ with st.sidebar:
         os.environ["SERPER_API_KEY"] = serper_key
     
     st.markdown("---")
-    st.markdown("### 📖 Instructions")
+    
     st.markdown("""
-    1. Enter the startup pitch deck text
-    2. Click "Run Analysis" to start
-    3. Review the multi-agent analysis
-    4. Check the debate and final verdict
-    """)
+    <div style='margin-top: 2rem;'>
+        <h3 style='font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;'>📖 Quick Guide</h3>
+        <div style='color: #64748b; font-size: 0.875rem; line-height: 1.6;'>
+            <p style='margin: 0.75rem 0;'>1. Enter the startup pitch deck text</p>
+            <p style='margin: 0.75rem 0;'>2. Click "Run Analysis" to start</p>
+            <p style='margin: 0.75rem 0;'>3. Review the multi-agent analysis</p>
+            <p style='margin: 0.75rem 0;'>4. Check the debate and final verdict</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
-# Main UI
-st.title("📊 DealScout VC Terminal")
-st.markdown("**Multi-Agent Deal Analysis Platform**")
+# Premium Main UI
+st.markdown("""
+    <div style='margin-bottom: 1rem;'>
+        <h1 style='margin-bottom: 0.5rem;'>📊 DealScout VC Terminal</h1>
+        <p style='font-size: 1.125rem; color: #64748b; font-weight: 500; margin: 0;'>Multi-Agent Deal Analysis Platform</p>
+    </div>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
-# Input Section
+# Premium Input Section
 with st.container():
-    st.subheader("📝 Deal Input")
+    st.markdown("""
+    <div style='margin-bottom: 1.5rem;'>
+        <h2 style='margin-bottom: 0.5rem;'>📝 Deal Input</h2>
+        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Enter the startup pitch deck for comprehensive analysis</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns([3, 1])
+    pitch_text = st.text_area(
+        "Startup Pitch Deck",
+        height=220,
+        placeholder="Paste the startup pitch deck text here...\n\nExample:\nCompany: [Name]\nProduct: [Description]\nMarket: [Market info]\nTraction: [Metrics]\nTeam: [Team info]",
+        help="Enter the full pitch deck text for analysis",
+        label_visibility="collapsed"
+    )
     
-    with col1:
-        pitch_text = st.text_area(
-            "Startup Pitch Deck",
-            height=200,
-            placeholder="Paste the startup pitch deck text here...\n\nExample:\nCompany: [Name]\nProduct: [Description]\nMarket: [Market info]\nTraction: [Metrics]\nTeam: [Team info]",
-            help="Enter the full pitch deck text for analysis"
-        )
-    
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        st.markdown("<br>", unsafe_allow_html=True)  # Spacing
-        st.caption("💡 Enter pitch deck text to analyze")
-    
-    run_analysis = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
+        run_analysis = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
 
 # Initialize session state
 if "analysis_result" not in st.session_state:
@@ -484,11 +688,15 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     result = st.session_state.analysis_result
     
     st.markdown("---")
-    st.header("📊 Analysis Dashboard")
     
-    # Row 1: High-Level Metrics
-    st.subheader("At a Glance")
+    st.markdown("""
+    <div style='margin-bottom: 1.5rem;'>
+        <h2 style='margin-bottom: 0.5rem;'>📊 Analysis Dashboard</h2>
+        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Key metrics and insights at a glance</p>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Premium Metrics Display
     market_metrics = extract_metrics(result.get('market_analysis', ''), "market")
     product_metrics = extract_metrics(result.get('product_analysis', ''), "product")
     
@@ -506,10 +714,10 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
             st.metric("Market Timing Score", "N/A")
         tam = market_metrics.get("tam_estimate", "N/A")
         if tam != "N/A":
-            st.caption(f"TAM: {tam}")
+            st.caption(f"📊 TAM: {tam}")
         competitors = market_metrics.get("competitors", [])
         if competitors:
-            st.caption(f"Competitors: {len(competitors)} identified")
+            st.caption(f"🏢 Competitors: {len(competitors)} identified")
     
     with col2:
         pmf = product_metrics.get("product_market_fit", "N/A")
@@ -520,27 +728,29 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
         )
         feature_platform = product_metrics.get("is_feature_or_platform", "N/A")
         if feature_platform != "N/A":
-            st.caption(f"Type: {str(feature_platform).title()}")
+            st.caption(f"🔧 Type: {str(feature_platform).title()}")
         tech_risk = product_metrics.get("technical_risk", "N/A")
         if tech_risk != "N/A" and tech_risk:
-            st.caption(f"Risk: {str(tech_risk)[:50]}...")
+            st.caption(f"⚠️ Risk: {str(tech_risk)[:50]}...")
     
     st.markdown("---")
     
-    # Row 2: Agent Debate (Chat Interface)
-    st.subheader("💬 Agent Debate")
+    # Premium Debate Section
+    st.markdown("""
+    <div style='margin-bottom: 1.5rem;'>
+        <h2 style='margin-bottom: 0.5rem;'>💬 Agent Debate</h2>
+        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Real-time discussion between Market and Product analysts</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     debate_messages = parse_debate_transcript(result.get('debate_transcript', ''))
     
     if debate_messages:
-        # Create a container for the chat
         chat_container = st.container()
         with chat_container:
             for msg in debate_messages:
-                # System messages (TOPIC, CONSENSUS) in center
                 if msg["agent"] == "System":
                     st.info(f"{msg['avatar']} {msg['message']}")
-                # Market Agent on left, others on right
                 elif "Market" in msg["agent"]:
                     with st.chat_message("user", avatar=msg["avatar"]):
                         st.write(f"**{msg['agent']}**")
@@ -550,14 +760,18 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
                         st.write(f"**{msg['agent']}**")
                         st.write(msg["message"])
     else:
-        # Fallback: display raw transcript
         st.info("📄 Debate transcript format not recognized. Displaying raw text:")
-        st.text_area("Debate Transcript", result.get('debate_transcript', 'N/A'), height=200, disabled=True)
+        st.text_area("Debate Transcript", result.get('debate_transcript', 'N/A'), height=200, disabled=True, label_visibility="collapsed")
     
     st.markdown("---")
     
-    # Row 3: Deep Dives (Expanders)
-    st.subheader("🔍 Deep Dives")
+    # Premium Deep Dives
+    st.markdown("""
+    <div style='margin-bottom: 1.5rem;'>
+        <h2 style='margin-bottom: 0.5rem;'>🔍 Deep Dives</h2>
+        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Detailed analysis reports from each agent</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -579,8 +793,13 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     
     st.markdown("---")
     
-    # Row 4: The Verdict (Final Memo)
-    st.subheader("⚖️ Investment Verdict")
+    # Premium Final Verdict
+    st.markdown("""
+    <div style='margin-bottom: 1.5rem;'>
+        <h2 style='margin-bottom: 0.5rem;'>⚖️ Investment Verdict</h2>
+        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Final recommendation from the General Partner</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     final_memo = result.get('final_memo', '')
     color_class, verdict_text = get_verdict_color(final_memo)
@@ -590,19 +809,25 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     st.markdown(final_memo)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Download Report Button
+    # Premium Download Button
     st.markdown("---")
     report_text = generate_report_text(result)
     
-    st.download_button(
-        label="📥 Download Full Report",
-        data=report_text,
-        file_name=f"dealscout_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-        mime="text/plain",
-        use_container_width=True
-    )
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        st.download_button(
+            label="📥 Download Full Report",
+            data=report_text,
+            file_name=f"dealscout_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
 
-# Footer
+# Premium Footer
 st.markdown("---")
-st.caption("DealScout VC Terminal • Multi-Agent Deal Analysis Platform")
-
+st.markdown("""
+    <div style='text-align: center; padding: 2rem 0; color: #64748b; font-size: 0.875rem;'>
+        <p style='margin: 0; font-weight: 500;'>DealScout VC Terminal</p>
+        <p style='margin: 0.5rem 0 0 0;'>Multi-Agent Deal Analysis Platform</p>
+    </div>
+""", unsafe_allow_html=True)
