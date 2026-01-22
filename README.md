@@ -57,5 +57,5 @@ DealScout is powered by **5 specialized agents** running on **Gemini 2.5 Flash**
 
 1. **Clone the Repository**
    ```bash
-   git clone [https://github.com/yourusername/dealscout.git](https://github.com/AKMessi/dealscout.git)
+   git clone (https://github.com/AKMessi/dealscout.git)
    cd dealscout
