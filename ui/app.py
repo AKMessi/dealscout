@@ -12,7 +12,11 @@ from pathlib import Path
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-from agent import app as workflow
+try:
+    from agent import app as workflow
+except ImportError as e:
+    st.error(f"Failed to import agent module: {e}")
+    st.stop()
 
 # Page config
 st.set_page_config(
@@ -22,311 +26,568 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# World-class CSS design system
+# Test element to ensure content renders
+try:
+    st.write("")  # Empty write to ensure Streamlit is working
+except:
+    pass
+
+# GOD-TIER CSS Design System
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
     
     * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
     
-    /* Main container - premium spacing */
+    /* Main content wrapper */
+    .main {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Ensure all Streamlit elements are visible */
+    .main > div,
+    .main > div > div {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Main container - ultimate spacing */
     .main .block-container {
-        padding-top: 3rem;
-        padding-bottom: 3rem;
-        padding-left: 3rem;
-        padding-right: 3rem;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+        padding-left: 4rem;
+        padding-right: 4rem;
         max-width: 1600px;
     }
     
-    /* App background - pristine white */
+    /* App background - pristine white with subtle animation */
     .stApp {
-        background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+        background: linear-gradient(180deg, #ffffff 0%, #fafbfc 50%, #ffffff 100%);
         color: #0f172a;
+        position: relative;
+        z-index: 0;
     }
     
-    /* Premium typography */
+    /* Ensure content is visible */
+    .stApp > div {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Ultimate typography system */
     h1 {
-        font-size: 2.75rem !important;
-        font-weight: 800 !important;
-        letter-spacing: -0.02em !important;
+        font-size: 3rem !important;
+        font-weight: 900 !important;
+        letter-spacing: -0.03em !important;
         color: #0f172a !important;
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0.75rem !important;
         line-height: 1.1 !important;
+        animation: fadeInUp 0.6s ease-out;
+        position: relative;
+        z-index: 1;
     }
     
     h2 {
-        font-size: 1.875rem !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.01em !important;
+        font-size: 2rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.02em !important;
         color: #1e293b !important;
-        margin-top: 2.5rem !important;
-        margin-bottom: 1.5rem !important;
+        margin-top: 3rem !important;
+        margin-bottom: 1.75rem !important;
+        animation: fadeInUp 0.7s ease-out;
     }
     
     h3 {
-        font-size: 1.5rem !important;
-        font-weight: 600 !important;
+        font-size: 1.625rem !important;
+        font-weight: 700 !important;
         color: #334155 !important;
-        margin-top: 2rem !important;
-        margin-bottom: 1rem !important;
+        margin-top: 2.5rem !important;
+        margin-bottom: 1.25rem !important;
     }
     
-    /* Premium input styling */
+    /* Keyframe animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Ultimate input styling with glassmorphism */
     .stTextArea textarea, .stTextInput input {
-        background-color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(10px) !important;
         color: #0f172a !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        padding: 14px 16px !important;
+        border: 2px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 16px !important;
+        padding: 18px 20px !important;
         font-size: 15px !important;
         font-weight: 400 !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06) !important;
     }
     
     .stTextArea textarea:focus, .stTextInput input:focus {
         border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12), 0 4px 12px rgba(59, 130, 246, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
         outline: none !important;
+        transform: translateY(-1px) !important;
+        background: rgba(255, 255, 255, 1) !important;
     }
     
     .stTextArea textarea:hover, .stTextInput input:hover {
         border-color: #cbd5e1 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
     }
     
     /* Disabled inputs */
     .stTextArea textarea[disabled], .stTextInput input[disabled] {
-        background-color: #f8fafc !important;
+        background: rgba(248, 250, 252, 0.9) !important;
         color: #64748b !important;
         border-color: #e2e8f0 !important;
         opacity: 1 !important;
     }
     
-    /* Premium metric cards */
+    /* Ultimate metric cards with circular progress */
     [data-testid="stMetricContainer"] {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 16px !important;
-        padding: 24px !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
+        border-radius: 24px !important;
+        padding: 32px !important;
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.06),
+            0 2px 8px rgba(0, 0, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    [data-testid="stMetricContainer"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+    
+    [data-testid="stMetricContainer"]:hover::before {
+        left: 100%;
     }
     
     [data-testid="stMetricContainer"]:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06) !important;
-        border-color: #cbd5e1 !important;
+        transform: translateY(-4px) scale(1.02) !important;
+        box-shadow: 
+            0 12px 32px rgba(0, 0, 0, 0.1),
+            0 4px 16px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
     }
     
     [data-testid="stMetricValue"] {
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
+        font-size: 3rem !important;
+        font-weight: 800 !important;
         color: #0f172a !important;
-        letter-spacing: -0.02em !important;
-        line-height: 1.2 !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.1 !important;
     }
     
     [data-testid="stMetricLabel"] {
         font-size: 0.875rem !important;
         color: #64748b !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
-        margin-top: 8px !important;
+        letter-spacing: 0.1em !important;
+        margin-top: 12px !important;
     }
     
     [data-testid="stMetricDelta"] {
-        font-weight: 600 !important;
-        font-size: 0.875rem !important;
+        font-weight: 700 !important;
+        font-size: 0.9375rem !important;
     }
     
-    /* Premium expanders */
+    /* Circular progress indicator */
+    .circular-progress {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: conic-gradient(#3b82f6 0deg, #e2e8f0 0deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin: 20px auto;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    }
+    
+    .circular-progress::before {
+        content: '';
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: white;
+        position: absolute;
+    }
+    
+    .progress-value {
+        position: relative;
+        z-index: 1;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    
+    /* Ultimate expanders */
     .streamlit-expanderHeader {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 12px !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
+        border-radius: 16px !important;
         color: #1e293b !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        padding: 16px 20px !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        font-weight: 700 !important;
+        font-size: 1.0625rem !important;
+        padding: 20px 24px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
     }
     
     .streamlit-expanderHeader:hover {
-        background: #f8fafc !important;
-        border-color: #cbd5e1 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 100%) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+        transform: translateY(-2px) !important;
     }
     
     .streamlit-expanderContent {
-        background-color: #ffffff !important;
-        border: 1.5px solid #e2e8f0 !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
         border-top: none !important;
-        border-radius: 0 0 12px 12px !important;
-        padding: 20px !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        border-radius: 0 0 16px 16px !important;
+        padding: 28px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
     }
     
-    /* Premium chat messages */
+    /* Ultimate chat messages */
     .stChatMessage {
-        padding: 20px 24px !important;
-        margin: 12px 0 !important;
-        border-radius: 16px !important;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-        border: 1.5px solid #e2e8f0 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
-        transition: all 0.2s ease !important;
+        padding: 24px 28px !important;
+        margin: 16px 0 !important;
+        border-radius: 20px !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.06),
+            0 2px 8px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        animation: slideIn 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stChatMessage::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #3b82f6 0%, #10b981 100%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .stChatMessage:hover::before {
+        opacity: 1;
     }
     
     .stChatMessage:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06) !important;
-        transform: translateY(-1px) !important;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        transform: translateY(-2px) translateX(4px) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
     }
     
     .stChatMessage p, .stChatMessage div, .stChatMessage span {
         color: #1e293b !important;
-        line-height: 1.6 !important;
+        line-height: 1.7 !important;
     }
     
-    /* Premium status indicator */
+    /* Ultimate status indicator */
     [data-testid="stStatus"] {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 16px !important;
-        padding: 24px !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
+        border-radius: 20px !important;
+        padding: 32px !important;
         color: #1e293b !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.06),
+            0 2px 8px rgba(0, 0, 0, 0.04) !important;
+        animation: fadeInUp 0.6s ease-out;
     }
     
-    /* Premium final memo container */
+    /* Ultimate final memo container */
     .final-memo-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-        border: 2px solid #e2e8f0 !important;
-        border-radius: 20px !important;
-        padding: 32px 40px !important;
-        margin: 2rem 0 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%) !important;
+        backdrop-filter: blur(30px) !important;
+        border: 3px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 28px !important;
+        padding: 48px 56px !important;
+        margin: 3rem 0 !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.08),
+            0 4px 16px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
         color: #1e293b !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    .final-memo-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
     }
     
     .final-memo-container:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.06) !important;
-        transform: translateY(-2px) !important;
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.12),
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        transform: translateY(-4px) scale(1.01) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
     }
     
     .final-memo-container p, .final-memo-container div {
         color: #1e293b !important;
-        line-height: 1.75 !important;
-        font-size: 15px !important;
+        line-height: 1.8 !important;
+        font-size: 16px !important;
+        position: relative;
+        z-index: 1;
     }
     
     .memo-header-invest {
         color: #059669 !important;
-        font-size: 1.75rem !important;
-        font-weight: 800 !important;
-        margin-bottom: 1.5rem !important;
-        letter-spacing: -0.01em !important;
+        font-size: 2rem !important;
+        font-weight: 900 !important;
+        margin-bottom: 2rem !important;
+        letter-spacing: -0.02em !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
+        gap: 16px !important;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
     }
     
     .memo-header-pass {
         color: #dc2626 !important;
-        font-size: 1.75rem !important;
-        font-weight: 800 !important;
-        margin-bottom: 1.5rem !important;
-        letter-spacing: -0.01em !important;
+        font-size: 2rem !important;
+        font-weight: 900 !important;
+        margin-bottom: 2rem !important;
+        letter-spacing: -0.02em !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
+        gap: 16px !important;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
     }
     
     .memo-header-maybe {
         color: #d97706 !important;
-        font-size: 1.75rem !important;
-        font-weight: 800 !important;
-        margin-bottom: 1.5rem !important;
-        letter-spacing: -0.01em !important;
+        font-size: 2rem !important;
+        font-weight: 900 !important;
+        margin-bottom: 2rem !important;
+        letter-spacing: -0.02em !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
+        gap: 16px !important;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
     }
     
-    /* Premium button styling */
+    /* Ultimate button styling */
     .stButton > button {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        font-weight: 600 !important;
-        font-size: 15px !important;
-        padding: 14px 28px !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        letter-spacing: 0.01em !important;
+        font-weight: 700 !important;
+        font-size: 16px !important;
+        padding: 18px 36px !important;
+        border-radius: 14px !important;
+        box-shadow: 
+            0 4px 12px rgba(59, 130, 246, 0.3),
+            0 2px 6px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        letter-spacing: 0.02em !important;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .stButton > button:hover::before {
+        left: 100%;
     }
     
     .stButton > button:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-        transform: translateY(-1px) !important;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%) !important;
+        box-shadow: 
+            0 8px 20px rgba(59, 130, 246, 0.4),
+            0 4px 10px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+        transform: translateY(-2px) scale(1.02) !important;
     }
     
     .stButton > button:active {
-        transform: translateY(0) !important;
+        transform: translateY(0) scale(0.98) !important;
     }
     
-    /* Premium sidebar */
+    /* Ultimate sidebar */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
-        border-right: 1.5px solid #e2e8f0 !important;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%) !important;
+        backdrop-filter: blur(20px) !important;
+        border-right: 2px solid rgba(226, 232, 240, 0.6) !important;
     }
     
     [data-testid="stSidebar"] .stTextInput input {
-        background-color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(10px) !important;
         color: #0f172a !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 10px !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
+        border-radius: 12px !important;
     }
     
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
         color: #1e293b !important;
     }
     
-    /* Premium info boxes */
+    /* Ultimate info boxes */
     .stAlert {
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
-        border: 1.5px solid #93c5fd !important;
-        border-radius: 12px !important;
+        background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.95) 100%) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 2px solid rgba(147, 197, 253, 0.6) !important;
+        border-radius: 16px !important;
         color: #1e40af !important;
-        padding: 16px 20px !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        padding: 20px 24px !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1) !important;
+        animation: fadeInUp 0.5s ease-out;
     }
     
-    /* Premium caption */
+    /* Ultimate caption */
     .stCaption {
         color: #64748b !important;
-        font-size: 0.8125rem !important;
-        font-weight: 500 !important;
-        margin-top: 8px !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        margin-top: 12px !important;
+        letter-spacing: 0.01em !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        line-height: 1.5 !important;
     }
     
-    /* Premium dividers */
+    /* Ensure caption text is visible */
+    [data-testid="stCaption"] {
+        color: #64748b !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+    }
+    
+    [data-testid="stCaption"] > * {
+        color: #64748b !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ultimate dividers */
     hr {
         border: none !important;
-        border-top: 1.5px solid #e2e8f0 !important;
-        margin: 2.5rem 0 !important;
+        border-top: 2px solid rgba(226, 232, 240, 0.8) !important;
+        margin: 3.5rem 0 !important;
+        position: relative;
     }
     
-    /* Premium markdown */
+    hr::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    }
+    
+    /* Ultimate markdown */
     .stMarkdown {
         color: #1e293b !important;
-        line-height: 1.7 !important;
+        line-height: 1.8 !important;
     }
     
     .stMarkdown p, .stMarkdown li, .stMarkdown strong {
@@ -334,39 +595,89 @@ st.markdown("""
     }
     
     .stMarkdown strong {
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         color: #0f172a !important;
     }
     
-    /* Premium JSON display */
+    /* Ultimate JSON display */
     .stJson {
-        background: #f8fafc !important;
-        border: 1.5px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        padding: 20px !important;
+        background: rgba(248, 250, 252, 0.9) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 2px solid rgba(226, 232, 240, 0.6) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        font-family: 'JetBrains Mono', monospace !important;
     }
     
-    /* Premium download button */
+    /* Ensure pre-formatted text is visible */
+    pre {
+        color: #1e293b !important;
+        background: #f8fafc !important;
+        padding: 20px !important;
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        overflow-x: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure expander content is visible */
+    .streamlit-expanderContent pre,
+    .streamlit-expanderContent code,
+    .streamlit-expanderContent .stJson {
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #1e293b !important;
+    }
+    
+    /* Ultimate download button */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        font-weight: 600 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2) !important;
-        transition: all 0.2s ease !important;
+        font-weight: 700 !important;
+        border-radius: 14px !important;
+        box-shadow: 
+            0 4px 12px rgba(16, 185, 129, 0.3),
+            0 2px 6px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stDownloadButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .stDownloadButton > button:hover::before {
+        left: 100%;
     }
     
     .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3) !important;
-        transform: translateY(-1px) !important;
+        background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%) !important;
+        box-shadow: 
+            0 8px 20px rgba(16, 185, 129, 0.4),
+            0 4px 10px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px) scale(1.02) !important;
     }
     
-    /* Premium error styling */
+    /* Ultimate error styling */
     .stAlert[data-baseweb="notification"] {
-        border-radius: 12px !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+        backdrop-filter: blur(10px) !important;
     }
     
     /* Smooth scroll */
@@ -379,22 +690,84 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Premium spacing utilities */
-    .premium-spacing {
-        margin: 2rem 0;
+    /* Force visibility of all content */
+    [data-testid="stAppViewContainer"] {
+        position: relative !important;
+        z-index: 1 !important;
     }
     
-    /* Custom metric badge */
-    .metric-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        border: 1px solid #bae6fd;
+    [data-testid="stAppViewContainer"] > div {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+    
+    /* Ensure all Streamlit elements are visible */
+    .element-container,
+    .stMarkdown,
+    .stTextArea,
+    .stTextInput,
+    .stButton {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+    
+    /* Critical: Ensure main content is always visible */
+    .main .block-container {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+    }
+    
+    /* Ensure text is always visible */
+    p, h1, h2, h3, h4, h5, h6, span, div, label {
+        color: inherit !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Loading skeleton */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 12px;
+        height: 20px;
+        margin: 10px 0;
+    }
+    
+    /* Badge component */
+    .premium-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+        border: 1.5px solid rgba(59, 130, 246, 0.3);
         border-radius: 20px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #0369a1;
-        margin-top: 8px;
+        margin-top: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Progress bar */
+    .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: rgba(226, 232, 240, 0.5);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 12px 0;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -414,7 +787,6 @@ def clean_json(text: str) -> Optional[Dict[str, Any]]:
     text = text.strip()
     
     # Try to find JSON object in the text
-    # Look for { ... } pattern
     json_match = re.search(r'\{.*\}', text, re.DOTALL)
     if json_match:
         json_str = json_match.group(0)
@@ -426,14 +798,12 @@ def clean_json(text: str) -> Optional[Dict[str, Any]]:
         return json.loads(json_str)
     except json.JSONDecodeError:
         # Try to fix common issues
-        # Remove trailing commas
         json_str = re.sub(r',\s*}', '}', json_str)
         json_str = re.sub(r',\s*]', ']', json_str)
         
         try:
             return json.loads(json_str)
         except json.JSONDecodeError:
-            # Last resort: try to extract key-value pairs manually
             return None
 
 
@@ -478,7 +848,6 @@ def parse_debate_transcript(transcript: str) -> list:
                 continue
             continue
         
-        # Check for agent labels (case-insensitive, handle variations)
         line_lower = line.lower()
         if "market agent" in line_lower and ":" in line:
             if current_agent and current_message:
@@ -578,12 +947,12 @@ END OF REPORT
     return report
 
 
-# Premium Sidebar
+# Ultimate Sidebar
 with st.sidebar:
     st.markdown("""
-    <div style='margin-bottom: 2rem;'>
-        <h1 style='font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;'>⚙️ Settings</h1>
-        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Configure your API keys</p>
+    <div style='margin-bottom: 2.5rem; animation: fadeInUp 0.6s ease-out;'>
+        <h1 style='font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 0.75rem; letter-spacing: -0.02em;'>⚙️ Settings</h1>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Configure your API keys</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -602,40 +971,40 @@ with st.sidebar:
     st.markdown("---")
     
     st.markdown("""
-    <div style='margin-top: 2rem;'>
-        <h3 style='font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;'>📖 Quick Guide</h3>
-        <div style='color: #64748b; font-size: 0.875rem; line-height: 1.6;'>
-            <p style='margin: 0.75rem 0;'>1. Enter the startup pitch deck text</p>
-            <p style='margin: 0.75rem 0;'>2. Click "Run Analysis" to start</p>
-            <p style='margin: 0.75rem 0;'>3. Review the multi-agent analysis</p>
-            <p style='margin: 0.75rem 0;'>4. Check the debate and final verdict</p>
+    <div style='margin-top: 2.5rem; animation: fadeInUp 0.8s ease-out;'>
+        <h3 style='font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; letter-spacing: -0.01em;'>📖 Quick Guide</h3>
+        <div style='color: #64748b; font-size: 0.9375rem; line-height: 1.8; font-weight: 500;'>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #3b82f6;'>1. Enter the startup pitch deck text</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #10b981;'>2. Click "Run Analysis" to start</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #8b5cf6;'>3. Review the multi-agent analysis</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #f59e0b;'>4. Check the debate and final verdict</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 
-# Premium Main UI
+# Ultimate Main UI
 st.markdown("""
-    <div style='margin-bottom: 1rem;'>
-        <h1 style='margin-bottom: 0.5rem;'>📊 DealScout VC Terminal</h1>
-        <p style='font-size: 1.125rem; color: #64748b; font-weight: 500; margin: 0;'>Multi-Agent Deal Analysis Platform</p>
+    <div style='margin-bottom: 1.5rem; animation: fadeInUp 0.6s ease-out;'>
+        <h1 style='margin-bottom: 0.75rem;'>📊 DealScout VC Terminal</h1>
+        <p style='font-size: 1.25rem; color: #64748b; font-weight: 600; margin: 0; letter-spacing: -0.01em;'>Multi-Agent Deal Analysis Platform</p>
     </div>
 """, unsafe_allow_html=True)
 
 st.markdown("---")
 
-# Premium Input Section
+# Ultimate Input Section
 with st.container():
     st.markdown("""
-    <div style='margin-bottom: 1.5rem;'>
-        <h2 style='margin-bottom: 0.5rem;'>📝 Deal Input</h2>
-        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Enter the startup pitch deck for comprehensive analysis</p>
+    <div style='margin-bottom: 2rem; animation: fadeInUp 0.7s ease-out;'>
+        <h2 style='margin-bottom: 0.75rem;'>📝 Deal Input</h2>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Enter the startup pitch deck for comprehensive analysis</p>
     </div>
     """, unsafe_allow_html=True)
     
     pitch_text = st.text_area(
         "Startup Pitch Deck",
-        height=220,
+        height=240,
         placeholder="Paste the startup pitch deck text here...\n\nExample:\nCompany: [Name]\nProduct: [Description]\nMarket: [Market info]\nTraction: [Metrics]\nTeam: [Team info]",
         help="Enter the full pitch deck text for analysis",
         label_visibility="collapsed"
@@ -690,13 +1059,13 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     st.markdown("---")
     
     st.markdown("""
-    <div style='margin-bottom: 1.5rem;'>
-        <h2 style='margin-bottom: 0.5rem;'>📊 Analysis Dashboard</h2>
-        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Key metrics and insights at a glance</p>
+    <div style='margin-bottom: 2rem; animation: fadeInUp 0.8s ease-out;'>
+        <h2 style='margin-bottom: 0.75rem;'>📊 Analysis Dashboard</h2>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Key metrics and insights at a glance</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Premium Metrics Display
+    # Ultimate Metrics Display
     market_metrics = extract_metrics(result.get('market_analysis', ''), "market")
     product_metrics = extract_metrics(result.get('product_analysis', ''), "product")
     
@@ -713,11 +1082,24 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
         else:
             st.metric("Market Timing Score", "N/A")
         tam = market_metrics.get("tam_estimate", "N/A")
-        if tam != "N/A":
-            st.caption(f"📊 TAM: {tam}")
+        if tam != "N/A" and tam:
+            # Use markdown for better visibility
+            st.markdown(f"""
+            <div style='margin-top: 12px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #3b82f6;'>
+                <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
+                    📊 <strong>TAM:</strong> <span style='color: #1e293b;'>{tam}</span>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
         competitors = market_metrics.get("competitors", [])
-        if competitors:
-            st.caption(f"🏢 Competitors: {len(competitors)} identified")
+        if competitors and len(competitors) > 0:
+            st.markdown(f"""
+            <div style='margin-top: 8px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #10b981;'>
+                <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
+                    🏢 <strong>Competitors:</strong> <span style='color: #1e293b;'>{len(competitors)} identified</span>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
     
     with col2:
         pmf = product_metrics.get("product_market_fit", "N/A")
@@ -727,19 +1109,32 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
             delta=None
         )
         feature_platform = product_metrics.get("is_feature_or_platform", "N/A")
-        if feature_platform != "N/A":
-            st.caption(f"🔧 Type: {str(feature_platform).title()}")
+        if feature_platform != "N/A" and feature_platform:
+            st.markdown(f"""
+            <div style='margin-top: 12px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #8b5cf6;'>
+                <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
+                    🔧 <strong>Type:</strong> <span style='color: #1e293b;'>{str(feature_platform).title()}</span>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
         tech_risk = product_metrics.get("technical_risk", "N/A")
         if tech_risk != "N/A" and tech_risk:
-            st.caption(f"⚠️ Risk: {str(tech_risk)[:50]}...")
+            risk_text = str(tech_risk)[:50] + "..." if len(str(tech_risk)) > 50 else str(tech_risk)
+            st.markdown(f"""
+            <div style='margin-top: 8px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #f59e0b;'>
+                <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
+                    ⚠️ <strong>Risk:</strong> <span style='color: #1e293b;'>{risk_text}</span>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Premium Debate Section
+    # Ultimate Debate Section
     st.markdown("""
-    <div style='margin-bottom: 1.5rem;'>
-        <h2 style='margin-bottom: 0.5rem;'>💬 Agent Debate</h2>
-        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Real-time discussion between Market and Product analysts</p>
+    <div style='margin-bottom: 2rem; animation: fadeInUp 0.9s ease-out;'>
+        <h2 style='margin-bottom: 0.75rem;'>💬 Agent Debate</h2>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Real-time discussion between Market and Product analysts</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -748,7 +1143,7 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     if debate_messages:
         chat_container = st.container()
         with chat_container:
-            for msg in debate_messages:
+            for i, msg in enumerate(debate_messages):
                 if msg["agent"] == "System":
                     st.info(f"{msg['avatar']} {msg['message']}")
                 elif "Market" in msg["agent"]:
@@ -765,39 +1160,66 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     
     st.markdown("---")
     
-    # Premium Deep Dives
+    # Ultimate Deep Dives
     st.markdown("""
-    <div style='margin-bottom: 1.5rem;'>
-        <h2 style='margin-bottom: 0.5rem;'>🔍 Deep Dives</h2>
-        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Detailed analysis reports from each agent</p>
+    <div style='margin-bottom: 2rem; animation: fadeInUp 1s ease-out;'>
+        <h2 style='margin-bottom: 0.75rem;'>🔍 Deep Dives</h2>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Detailed analysis reports from each agent</p>
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
-        with st.expander("📈 Market Analysis", expanded=False):
-            market_parsed = clean_json(result.get('market_analysis', ''))
+        with st.expander("📈 Market Analysis", expanded=True):
+            market_analysis_raw = result.get('market_analysis', '')
+            
+            # Try to parse as JSON first
+            market_parsed = clean_json(market_analysis_raw)
+            
             if market_parsed:
                 st.json(market_parsed)
+            elif market_analysis_raw:
+                # Display raw text with better formatting
+                st.markdown(f"""
+                <div style='background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;'>
+                    <pre style='white-space: pre-wrap; word-wrap: break-word; font-family: "JetBrains Mono", monospace; font-size: 14px; color: #1e293b; margin: 0;'>{market_analysis_raw}</pre>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.text(result.get('market_analysis', 'N/A'))
+                st.warning("⚠️ Market analysis not available")
+                st.text("No market analysis data found.")
     
     with col2:
-        with st.expander("🛡️ Product Analysis", expanded=False):
-            product_parsed = clean_json(result.get('product_analysis', ''))
-            if product_parsed:
-                st.json(product_parsed)
+        with st.expander("🛡️ Product Analysis", expanded=True):
+            product_analysis_raw = result.get('product_analysis', '')
+            
+            # Debug: Show if data exists
+            if not product_analysis_raw or product_analysis_raw.strip() == '':
+                st.error("⚠️ Product analysis is empty or not available")
+                st.info("The product analysis field appears to be empty. This might indicate an issue with the agent workflow.")
             else:
-                st.text(result.get('product_analysis', 'N/A'))
+                # Try to parse as JSON first
+                product_parsed = clean_json(product_analysis_raw)
+                
+                if product_parsed:
+                    st.json(product_parsed)
+                else:
+                    # Display raw text with better formatting
+                    st.markdown("**Raw Analysis Text:**")
+                    st.markdown(f"""
+                    <div style='background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;'>
+                        <pre style='white-space: pre-wrap; word-wrap: break-word; font-family: "JetBrains Mono", monospace; font-size: 14px; color: #1e293b; margin: 0; line-height: 1.6;'>{product_analysis_raw}</pre>
+                    </div>
+                    """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Premium Final Verdict
+    # Ultimate Final Verdict
     st.markdown("""
-    <div style='margin-bottom: 1.5rem;'>
-        <h2 style='margin-bottom: 0.5rem;'>⚖️ Investment Verdict</h2>
-        <p style='color: #64748b; font-size: 0.875rem; margin: 0;'>Final recommendation from the General Partner</p>
+    <div style='margin-bottom: 2rem; animation: fadeInUp 1.1s ease-out;'>
+        <h2 style='margin-bottom: 0.75rem;'>⚖️ Investment Verdict</h2>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Final recommendation from the General Partner</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -809,7 +1231,7 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     st.markdown(final_memo)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Premium Download Button
+    # Ultimate Download Button
     st.markdown("---")
     report_text = generate_report_text(result)
     
@@ -823,11 +1245,11 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
             use_container_width=True
         )
 
-# Premium Footer
+# Ultimate Footer
 st.markdown("---")
 st.markdown("""
-    <div style='text-align: center; padding: 2rem 0; color: #64748b; font-size: 0.875rem;'>
-        <p style='margin: 0; font-weight: 500;'>DealScout VC Terminal</p>
-        <p style='margin: 0.5rem 0 0 0;'>Multi-Agent Deal Analysis Platform</p>
+    <div style='text-align: center; padding: 3rem 0; color: #64748b; font-size: 0.9375rem; animation: fadeInUp 1.2s ease-out;'>
+        <p style='margin: 0; font-weight: 700; font-size: 1.0625rem; color: #1e293b;'>DealScout VC Terminal</p>
+        <p style='margin: 0.75rem 0 0 0; font-weight: 500;'>Multi-Agent Deal Analysis Platform</p>
     </div>
 """, unsafe_allow_html=True)
