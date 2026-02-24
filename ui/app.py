@@ -14,9 +14,13 @@ sys.path.insert(0, str(src_path))
 
 try:
     from agent import app as workflow
+except ValueError as e:
+    st.error(f"⚠️ Configuration Error: {e}")
+    st.info("Please set your Google API Key in the sidebar.")
+    workflow = None
 except ImportError as e:
     st.error(f"Failed to import agent module: {e}")
-    st.stop()
+    workflow = None
 
 # Page config
 st.set_page_config(
@@ -460,6 +464,52 @@ st.markdown("""
         text-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
     }
     
+    /* Questions to reconsider container */
+    .questions-container {
+        background: linear-gradient(135deg, rgba(254, 252, 232, 0.98) 0%, rgba(254, 249, 195, 0.98) 100%) !important;
+        backdrop-filter: blur(30px) !important;
+        border: 3px solid rgba(234, 179, 8, 0.4) !important;
+        border-radius: 28px !important;
+        padding: 40px 48px !important;
+        margin: 2rem 0 !important;
+        box-shadow: 
+            0 8px 32px rgba(234, 179, 8, 0.1),
+            0 4px 16px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+        color: #1e293b !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.9s ease-out;
+    }
+    
+    .questions-container:hover {
+        box-shadow: 
+            0 16px 48px rgba(234, 179, 8, 0.15),
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        transform: translateY(-2px) !important;
+        border-color: rgba(234, 179, 8, 0.6) !important;
+    }
+    
+    .questions-container h3 {
+        color: #854d0e !important;
+        font-size: 1.5rem !important;
+        font-weight: 800 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .questions-container ol {
+        color: #1e293b !important;
+        padding-left: 1.5rem !important;
+    }
+    
+    .questions-container li {
+        color: #1e293b !important;
+        margin-bottom: 0.75rem !important;
+        line-height: 1.7 !important;
+    }
+    
     /* Ultimate button styling */
     .stButton > button {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%) !important;
@@ -769,6 +819,15 @@ st.markdown("""
         transition: width 0.5s ease;
         box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
+    
+    /* Traction analysis card */
+    .traction-card {
+        background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.95) 100%) !important;
+        border: 2px solid rgba(248, 113, 113, 0.3) !important;
+        border-radius: 20px !important;
+        padding: 24px !important;
+        margin: 1rem 0 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -799,7 +858,7 @@ def clean_json(text: str) -> Optional[Dict[str, Any]]:
     except json.JSONDecodeError:
         # Try to fix common issues
         json_str = re.sub(r',\s*}', '}', json_str)
-        json_str = re.sub(r',\s*]', ']', json_str)
+        json_str = re.sub(r',\s*\]', ']', json_str)
         
         try:
             return json.loads(json_str)
@@ -824,6 +883,10 @@ def extract_metrics(analysis_text: str, analysis_type: str) -> Dict[str, Any]:
             metrics["product_market_fit"] = parsed.get("product_market_fit", parsed.get("Product-Market Fit", "N/A"))
             metrics["is_feature_or_platform"] = parsed.get("is_feature_or_platform", parsed.get("feature_or_platform", "N/A"))
             metrics["technical_risk"] = parsed.get("technical_risk", parsed.get("core_technical_risk", "N/A"))
+        elif analysis_type == "traction":
+            metrics["traction_score"] = parsed.get("traction_score", parsed.get("Traction Score", 0))
+            metrics["metrics_realistic"] = parsed.get("metrics_seem_realistic", parsed.get("Metrics Realistic", "N/A"))
+            metrics["red_flags_count"] = len(parsed.get("red_flags", []))
     
     return metrics
 
@@ -869,6 +932,16 @@ def parse_debate_transcript(transcript: str) -> list:
             current_agent = "Product Agent"
             parts = line.split(":", 1)
             current_message = [parts[1].strip()] if len(parts) > 1 else []
+        elif "traction agent" in line_lower and ":" in line:
+            if current_agent and current_message:
+                messages.append({
+                    "agent": current_agent,
+                    "message": " ".join(current_message),
+                    "avatar": "📊"
+                })
+            current_agent = "Traction Agent"
+            parts = line.split(":", 1)
+            current_message = [parts[1].strip()] if len(parts) > 1 else []
         elif line.startswith("TOPIC:") or line.startswith("CONSENSUS:") or line.lower().startswith("turn"):
             if line.startswith("TOPIC:") or line.startswith("CONSENSUS:"):
                 messages.append({
@@ -882,10 +955,11 @@ def parse_debate_transcript(transcript: str) -> list:
     
     # Add last message
     if current_agent and current_message:
+        avatar = "📈" if "Market" in current_agent else ("🛡️" if "Product" in current_agent else "📊")
         messages.append({
             "agent": current_agent,
             "message": " ".join(current_message),
-            "avatar": "📈" if "Market" in current_agent else "🛡️"
+            "avatar": avatar
         })
     
     return messages
@@ -897,11 +971,11 @@ def get_verdict_color(memo: str) -> tuple:
     Returns (color_class, verdict_text)
     """
     memo_upper = memo.upper()
-    if "[INVEST]" in memo_upper:
+    if "[INVEST]" in memo_upper or "[STRONG YES]" in memo_upper:
         return ("memo-header-invest", "✅ INVEST")
     elif "[PASS]" in memo_upper:
         return ("memo-header-pass", "❌ PASS")
-    elif "[DIG DEEPER]" in memo_upper:
+    elif "[DIG DEEPER]" in memo_upper or "[MAYBE" in memo_upper:
         return ("memo-header-maybe", "⚠️ DIG DEEPER")
     else:
         return ("memo-header-maybe", "📋 VERDICT")
@@ -931,9 +1005,19 @@ PRODUCT ANALYSIS
 {state.get('product_analysis', 'N/A')}
 
 {'='*80}
+TRACTION ANALYSIS
+{'='*80}
+{state.get('traction_analysis', 'N/A')}
+
+{'='*80}
 AGENT DEBATE
 {'='*80}
 {state.get('debate_transcript', 'N/A')}
+
+{'='*80}
+QUESTIONS TO RECONSIDER
+{'='*80}
+{state.get('questions_to_reconsider', 'N/A')}
 
 {'='*80}
 INVESTMENT RECOMMENDATION
@@ -958,6 +1042,18 @@ with st.sidebar:
     
     st.markdown("---")
     
+    google_key = st.text_input(
+        "Google API Key",
+        type="password",
+        value=os.getenv("GOOGLE_API_KEY", ""),
+        help="Enter your Google API key for Gemini 2.5 Flash"
+    )
+    
+    if google_key:
+        os.environ["GOOGLE_API_KEY"] = google_key
+    
+    st.markdown("---")
+    
     serper_key = st.text_input(
         "Serper API Key",
         type="password",
@@ -974,10 +1070,11 @@ with st.sidebar:
     <div style='margin-top: 2.5rem; animation: fadeInUp 0.8s ease-out;'>
         <h3 style='font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; letter-spacing: -0.01em;'>📖 Quick Guide</h3>
         <div style='color: #64748b; font-size: 0.9375rem; line-height: 1.8; font-weight: 500;'>
-            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #3b82f6;'>1. Enter the startup pitch deck text</p>
-            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #10b981;'>2. Click "Run Analysis" to start</p>
-            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #8b5cf6;'>3. Review the multi-agent analysis</p>
-            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #f59e0b;'>4. Check the debate and final verdict</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #3b82f6;'><strong>Quick Mode:</strong> Enter company name + URL only</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #10b981;'><strong>Full Mode:</strong> Paste detailed pitch deck</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #8b5cf6;'>AI auto-researches if minimal input provided</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #f59e0b;'>Review multi-agent analysis & debate</p>
+            <p style='margin: 1rem 0; padding-left: 8px; border-left: 3px solid #ef4444;'>Check questions to reconsider & verdict</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -998,17 +1095,47 @@ with st.container():
     st.markdown("""
     <div style='margin-bottom: 2rem; animation: fadeInUp 0.7s ease-out;'>
         <h2 style='margin-bottom: 0.75rem;'>📝 Deal Input</h2>
-        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Enter the startup pitch deck for comprehensive analysis</p>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Enter company details - works with just name + URL or full pitch deck</p>
     </div>
     """, unsafe_allow_html=True)
     
-    pitch_text = st.text_area(
-        "Startup Pitch Deck",
-        height=240,
-        placeholder="Paste the startup pitch deck text here...\n\nExample:\nCompany: [Name]\nProduct: [Description]\nMarket: [Market info]\nTraction: [Metrics]\nTeam: [Team info]",
-        help="Enter the full pitch deck text for analysis",
-        label_visibility="collapsed"
-    )
+    # Input mode tabs
+    input_tab1, input_tab2 = st.tabs(["✨ Quick Mode (Name + URL)", "📄 Full Pitch Deck"])
+    
+    with input_tab1:
+        col1, col2 = st.columns(2)
+        with col1:
+            quick_company_name = st.text_input(
+                "Company Name",
+                placeholder="e.g., Anthropic",
+                help="Enter the company name",
+                key="quick_name"
+            )
+        with col2:
+            quick_company_url = st.text_input(
+                "Company Website",
+                placeholder="https://anthropic.com",
+                help="Enter the company website URL",
+                key="quick_url"
+            )
+        
+        st.info("💡 **Quick Mode**: Just enter the company name and URL. Our AI will research and generate a pitch deck automatically before analysis.")
+    
+    with input_tab2:
+        pitch_text = st.text_area(
+            "Startup Pitch Deck",
+            height=240,
+            placeholder="Paste the startup pitch deck text here...\n\nExample:\nCompany: [Name]\nProduct: [Description]\nMarket: [Market info]\nTraction: [Metrics]\nTeam: [Team info]",
+            help="Enter the full pitch deck text for analysis",
+            key="full_pitch"
+        )
+        
+        full_company_url = st.text_input(
+            "Company Website (optional)",
+            placeholder="https://...",
+            help="Optional: Add the company website for product analysis",
+            key="full_url"
+        )
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
@@ -1022,24 +1149,54 @@ if "analysis_complete" not in st.session_state:
 
 # Run analysis
 if run_analysis:
-    if not pitch_text:
-        st.error("⚠️ Please enter a pitch deck text to analyze.")
+    # Determine input mode and collect data
+    if 'pitch_text' in locals() and pitch_text and len(pitch_text.strip()) > 0:
+        # Full pitch deck mode
+        input_mode = "full"
+        raw_input = pitch_text
+        company_name = ""
+        company_url = full_company_url if 'full_company_url' in locals() else ""
+    elif quick_company_name or quick_company_url:
+        # Quick mode
+        input_mode = "quick"
+        raw_input = ""
+        company_name = quick_company_name
+        company_url = quick_company_url
     else:
+        st.error("⚠️ Please enter either:\n• Company name and URL (Quick Mode), OR\n• Full pitch deck text")
+        input_mode = None
+    
+    if input_mode and workflow is None:
+        st.error("⚠️ Analysis workflow is not available. Please check your API key configuration in the sidebar.")
+    elif input_mode:
+        # Prepare initial state
         initial_state = {
-            "pitch_text": pitch_text,
+            "company_name": company_name,
+            "company_url": company_url,
+            "raw_input": raw_input,
+            "pitch_text": "",  # Will be generated by research agent if needed
             "market_analysis": "",
             "product_analysis": "",
+            "traction_analysis": "",
             "debate_transcript": "",
+            "questions_to_reconsider": "",
             "final_memo": ""
         }
         
         # Execute workflow with status updates
         with st.status("🔄 Running multi-agent analysis...", expanded=True) as status:
             try:
-                status.update(
-                    label="🔄 Running analysis pipeline: Market → Product → Debate → Synthesis...",
-                    state="running"
-                )
+                if input_mode == "quick":
+                    status.update(
+                        label="🔍 Step 1/7: Researching company from web sources...",
+                        state="running"
+                    )
+                else:
+                    status.update(
+                        label="🔄 Running analysis pipeline: Research → Market → Product → Traction → Debate → Questions → Synthesis...",
+                        state="running"
+                    )
+                
                 result = workflow.invoke(initial_state)
                 
                 status.update(label="✅ Analysis complete!", state="complete")
@@ -1065,38 +1222,29 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     </div>
     """, unsafe_allow_html=True)
     
-    # Ultimate Metrics Display
+    # Ultimate Metrics Display - Now includes traction
     market_metrics = extract_metrics(result.get('market_analysis', ''), "market")
     product_metrics = extract_metrics(result.get('product_analysis', ''), "product")
+    traction_metrics = extract_metrics(result.get('traction_analysis', ''), "traction")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         timing_score = market_metrics.get("market_timing_score", 0)
         if isinstance(timing_score, (int, float)) and timing_score > 0:
             st.metric(
-                "Market Timing Score",
+                "Market Timing",
                 f"{timing_score}/10",
                 delta=None if timing_score == 0 else f"{timing_score - 5}"
             )
         else:
-            st.metric("Market Timing Score", "N/A")
+            st.metric("Market Timing", "N/A")
         tam = market_metrics.get("tam_estimate", "N/A")
         if tam != "N/A" and tam:
-            # Use markdown for better visibility
             st.markdown(f"""
             <div style='margin-top: 12px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #3b82f6;'>
                 <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
                     📊 <strong>TAM:</strong> <span style='color: #1e293b;'>{tam}</span>
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        competitors = market_metrics.get("competitors", [])
-        if competitors and len(competitors) > 0:
-            st.markdown(f"""
-            <div style='margin-top: 8px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #10b981;'>
-                <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
-                    🏢 <strong>Competitors:</strong> <span style='color: #1e293b;'>{len(competitors)} identified</span>
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -1117,13 +1265,33 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
                 </p>
             </div>
             """, unsafe_allow_html=True)
-        tech_risk = product_metrics.get("technical_risk", "N/A")
-        if tech_risk != "N/A" and tech_risk:
-            risk_text = str(tech_risk)[:50] + "..." if len(str(tech_risk)) > 50 else str(tech_risk)
+    
+    with col3:
+        # Traction metrics
+        traction_score = traction_metrics.get("traction_score", 0)
+        if isinstance(traction_score, (int, float)) and traction_score > 0:
+            st.metric(
+                "Traction Score",
+                f"{traction_score}/10",
+                delta=None
+            )
+        else:
+            st.metric("Traction Score", "N/A")
+        
+        red_flags = traction_metrics.get("red_flags_count", 0)
+        if red_flags > 0:
             st.markdown(f"""
-            <div style='margin-top: 8px; padding: 8px 12px; background: rgba(248, 250, 252, 0.8); border-radius: 8px; border-left: 3px solid #f59e0b;'>
+            <div style='margin-top: 12px; padding: 8px 12px; background: rgba(254, 242, 242, 0.8); border-radius: 8px; border-left: 3px solid #ef4444;'>
                 <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
-                    ⚠️ <strong>Risk:</strong> <span style='color: #1e293b;'>{risk_text}</span>
+                    🚩 <strong>Red Flags:</strong> <span style='color: #dc2626;'>{red_flags} found</span>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div style='margin-top: 12px; padding: 8px 12px; background: rgba(240, 253, 244, 0.8); border-radius: 8px; border-left: 3px solid #10b981;'>
+                <p style='margin: 0; color: #64748b; font-size: 0.875rem; font-weight: 600;'>
+                    ✅ <strong>Red Flags:</strong> <span style='color: #059669;'>None found</span>
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -1134,7 +1302,7 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     st.markdown("""
     <div style='margin-bottom: 2rem; animation: fadeInUp 0.9s ease-out;'>
         <h2 style='margin-bottom: 0.75rem;'>💬 Agent Debate</h2>
-        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Real-time discussion between Market and Product analysts</p>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Real-time discussion between Market, Product, and Traction analysts</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1150,6 +1318,10 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
                     with st.chat_message("user", avatar=msg["avatar"]):
                         st.write(f"**{msg['agent']}**")
                         st.write(msg["message"])
+                elif "Traction" in msg["agent"]:
+                    with st.chat_message("assistant", avatar=msg["avatar"]):
+                        st.write(f"**{msg['agent']}**")
+                        st.write(msg["message"])
                 else:
                     with st.chat_message("assistant", avatar=msg["avatar"]):
                         st.write(f"**{msg['agent']}**")
@@ -1160,7 +1332,32 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
     
     st.markdown("---")
     
-    # Ultimate Deep Dives
+    # Show Generated Pitch (if auto-generated from minimal input)
+    company_name = result.get('company_name', '')
+    raw_input = result.get('raw_input', '')
+    
+    # If raw_input was minimal (less than 200 chars) but we have a generated pitch, show it
+    if len(raw_input) < 200 and result.get('pitch_text'):
+        st.markdown(f"""
+        <div style='margin-bottom: 2rem; animation: fadeInUp 0.95s ease-out;'>
+            <h2 style='margin-bottom: 0.75rem;'>📝 Auto-Generated Pitch Deck</h2>
+            <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Research agent generated this pitch from web sources for <strong>{company_name}</strong></p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.expander("📄 View Generated Pitch", expanded=False):
+            pitch_content = result.get('pitch_text', '')
+            st.markdown(f"""
+            <div style='background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.1) 100%); padding: 24px; border-radius: 16px; border: 2px solid rgba(59, 130, 246, 0.2);'>
+                <pre style='white-space: pre-wrap; word-wrap: break-word; font-family: "JetBrains Mono", monospace; font-size: 14px; color: #1e293b; margin: 0; line-height: 1.7;'>{pitch_content}</pre>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.info("💡 This pitch was automatically generated from web research. For more accurate analysis, provide a detailed pitch deck in 'Full Pitch Deck' mode.")
+        
+        st.markdown("---")
+    
+    # Ultimate Deep Dives - Now includes Traction
     st.markdown("""
     <div style='margin-bottom: 2rem; animation: fadeInUp 1s ease-out;'>
         <h2 style='margin-bottom: 0.75rem;'>🔍 Deep Dives</h2>
@@ -1213,6 +1410,46 @@ if st.session_state.analysis_complete and st.session_state.analysis_result:
                     </div>
                     """, unsafe_allow_html=True)
     
+    # Traction Analysis - New Section
+    with st.expander("📊 Traction Analysis", expanded=True):
+        traction_analysis_raw = result.get('traction_analysis', '')
+        
+        if not traction_analysis_raw or traction_analysis_raw.strip() == '':
+            st.error("⚠️ Traction analysis is empty or not available")
+            st.info("The traction analysis field appears to be empty.")
+        else:
+            # Try to parse as JSON first
+            traction_parsed = clean_json(traction_analysis_raw)
+            
+            if traction_parsed:
+                st.json(traction_parsed)
+            else:
+                # Display raw text with better formatting
+                st.markdown("**Raw Analysis Text:**")
+                st.markdown(f"""
+                <div style='background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;'>
+                    <pre style='white-space: pre-wrap; word-wrap: break-word; font-family: "JetBrains Mono", monospace; font-size: 14px; color: #1e293b; margin: 0; line-height: 1.6;'>{traction_analysis_raw}</pre>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # NEW FEATURE: Questions to Reconsider Section
+    st.markdown("""
+    <div style='margin-bottom: 2rem; animation: fadeInUp 1.05s ease-out;'>
+        <h2 style='margin-bottom: 0.75rem;'>🎯 Questions to Reconsider</h2>
+        <p style='color: #64748b; font-size: 0.9375rem; margin: 0; font-weight: 500;'>Critical questions to think about before investing</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    questions_content = result.get('questions_to_reconsider', '')
+    if questions_content and questions_content.strip():
+        st.markdown('<div class="questions-container">', unsafe_allow_html=True)
+        st.markdown(questions_content)
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.info("📄 Questions to reconsider will appear here after analysis.")
+    
     st.markdown("---")
     
     # Ultimate Final Verdict
@@ -1250,6 +1487,6 @@ st.markdown("---")
 st.markdown("""
     <div style='text-align: center; padding: 3rem 0; color: #64748b; font-size: 0.9375rem; animation: fadeInUp 1.2s ease-out;'>
         <p style='margin: 0; font-weight: 700; font-size: 1.0625rem; color: #1e293b;'>DealScout VC Terminal</p>
-        <p style='margin: 0.75rem 0 0 0; font-weight: 500;'>Multi-Agent Deal Analysis Platform</p>
+        <p style='margin: 0.75rem 0 0 0; font-weight: 500;'>Multi-Agent Deal Analysis Platform with Due Diligence Questions</p>
     </div>
 """, unsafe_allow_html=True)
